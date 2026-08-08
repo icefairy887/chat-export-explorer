@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Trajectory Engine{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <p class="eyebrow">EVIDENCE-BACKED FORECASTING</p>
+  <h1>Trajectory Engine</h1>
+  <p>Describe your current state. The engine finds historically similar days and shows what appeared {{ horizon }} days later.</p>
+</section>
+
+<section class="panel">
+  <form method="post" class="trajectory-form">
+    <label for="text">What is happening right now?</label>
+    <textarea id="text" name="text" rows="7" placeholder="Example: I am studying Azure, applying for remote jobs, feeling uncertain, and trying not to let relationship stress derail me.">{{ text }}</textarea>
+    <div class="form-row">
+      <label for="horizon">Look ahead</label>
+      <select id="horizon" name="horizon">
+        {% for days in [7,14,30] %}<option value="{{ days }}" {% if days == horizon %}selected{% endif %}>{{ days }} days</option>{% endfor %}
+      </select>
+      <button type="submit">Find historical trajectories</button>
+    </div>
+  </form>
+  <p class="muted">Built from {{ total_states }} historical daily states. Results are similarity-based, not certainty claims.</p>
+</section>
+
+{% if analysis %}
+<section class="stats-grid">
+  <article class="stat-card"><span>Historical states</span><strong>{{ analysis.state_count }}</strong></article>
+  <article class="stat-card"><span>Closest matches</span><strong>{{ analysis.matches|length }}</strong></article>
+  <article class="stat-card"><span>Forecast window</span><strong>{{ analysis.horizon_days }} days</strong></article>
+</section>
+
+<section class="panel">
+  <h2>Current state signature</h2>
+  <div class="feature-bars">
+    {% for feature, value in analysis.current_dominant %}
+    <div class="feature-row"><span>{{ feature|title }}</span><div class="bar"><i style="width: {{ [value*34,100]|min }}%"></i></div><b>{{ '%.2f'|format(value) }}</b></div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <h2>What most often appeared next</h2>
+  {% if analysis.outcomes %}
+  <div class="outcome-grid">
+    {% for item in analysis.outcomes %}
+      <article class="outcome-card"><strong>{{ item.percent }}%</strong><span>{{ item.feature|title }} was prominent</span><small>{{ item.count }} matched paths</small></article>
+    {% endfor %}
+  </div>
+  {% else %}<p class="muted">The closest historical states did not have enough future data for this window.</p>{% endif %}
+  {% if analysis.changes %}
+  <h3>Average feature movement</h3>
+  <div class="change-list">
+    {% for feature, delta in analysis.changes %}
+      <div><span>{{ feature|title }}</span><b class="{% if delta > 0 %}up{% else %}down{% endif %}">{{ '%+.2f'|format(delta) }}</b></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>Closest historical states</h2>
+  <div class="match-list">
+    {% for match in analysis.matches %}
+    <article class="match-card">
+      <header><div><strong>{{ match.date }}</strong><span>{{ match.message_count }} messages across {{ match.conversation_count }} conversations</span></div><b>{{ (match.similarity*100)|round|int }}% similar</b></header>
+      <p>{{ match.text_sample[:700] }}{% if match.text_sample|length > 700 %}…{% endif %}</p>
+      {% if match.future %}
+      <footer><span>{{ analysis.horizon_days }} days later: {{ match.future.date }}</span>
+        <div>{% for feature, value in match.future_dominant %}<em>{{ feature }} {{ '%.2f'|format(value) }}</em>{% endfor %}</div>
+      </footer>
+      {% else %}<footer><span>No future state available for this window.</span></footer>{% endif %}
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

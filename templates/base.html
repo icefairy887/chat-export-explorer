@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Chat Export Explorer{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('index') }}">Chat Export Explorer</a>
+    <nav>
+      <a href="{{ url_for('search') }}">Search</a>
+      <a href="{{ url_for('browse') }}">Browse</a>
+      <a href="{{ url_for('patterns') }}">Patterns</a>
+        <a href="{{ url_for('trajectory_view') }}">Trajectory</a>
+      <a href="{{ url_for('simulate_view') }}">Simulator</a>
+    </nav>
+  </header>
+  <main class="shell">{% block content %}{% endblock %}</main>
+</body>
+</html>

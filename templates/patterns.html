@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Patterns · Chat Export Explorer{% endblock %}
+{% block content %}
+<section class="pattern-head">
+  <p class="eyebrow">PHRASE TRAJECTORY</p>
+  <h1>Pattern Explorer</h1>
+  <p class="muted">Track an exact phrase across time, conversations, and speakers.</p>
+</section>
+<form class="searchbar compact" method="get">
+  <input name="phrase" value="{{ phrase }}" placeholder="Try: I don't know, fuck it, should I" autofocus>
+  <select name="role">
+    <option value="" {% if not role %}selected{% endif %}>Everyone</option>
+    <option value="user" {% if role=='user' %}selected{% endif %}>You</option>
+    <option value="assistant" {% if role=='assistant' %}selected{% endif %}>Assistant</option>
+  </select>
+  <button>Analyze</button>
+</form>
+<div class="chips">
+  {% for preset in ["I don't know", "I guess", "fuck it", "should I", "spirit box", "what do I do"] %}
+    <a href="{{ url_for('patterns', phrase=preset, role='user') }}">{{ preset }}</a>
+  {% endfor %}
+</div>
+{% if phrase and summary %}
+<section class="stats-grid pattern-stats">
+  <article><strong>{{ '{:,}'.format(summary['occurrences']) }}</strong><span>Matching messages</span></article>
+  <article><strong>{{ '{:,}'.format(summary['conversation_count']) }}</strong><span>Conversations</span></article>
+  <article><strong>{{ (summary['first_seen'] or 'Unknown')[:10] }}</strong><span>First occurrence</span></article>
+  <article><strong>{{ (summary['latest_seen'] or 'Unknown')[:10] }}</strong><span>Latest occurrence</span></article>
+</section>
+{% if summary['occurrences'] %}
+<section class="panel">
+  <div class="panel-head"><h2>Frequency by month</h2><span class="muted">“{{ phrase }}”</span></div>
+  <div class="bars">
+    {% set max_count = monthly|map(attribute='occurrence_count')|max if monthly else 1 %}
+    {% for row in monthly %}
+      <div class="bar-row"><span>{{ row['month'] }}</span><div class="bar"><i style="width: {{ (row['occurrence_count'] / max_count * 100)|round }}%"></i></div><b>{{ row['occurrence_count'] }}</b></div>
+    {% endfor %}
+  </div>
+</section>
+<section class="panel">
+  <div class="panel-head"><h2>Where it clusters</h2><span class="muted">Top conversations</span></div>
+  <div class="list">
+    {% for row in conversations %}
+      <a class="list-row" href="{{ url_for('conversation', conversation_id=row['conversation_id']) }}">
+        <span><b>{{ row['title'] }}</b><small>{{ row['first_match'] or 'Unknown' }} → {{ row['latest_match'] or 'Unknown' }}</small></span>
+        <em>{{ row['occurrence_count'] }} matches</em>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+<section class="panel">
+  <div class="panel-head"><h2>Exact messages</h2><span class="muted">Newest first</span></div>
+  <div class="results">
+    {% for row in rows %}
+      <a class="result" href="{{ url_for('conversation', conversation_id=row['conversation_id']) }}#{{ row['message_id'] }}">
+        <div><span class="role {{ row['role'] }}">{{ row['role'] }}</span><time>{{ row['created_at'] or 'Unknown date' }}</time></div>
+        <h2>{{ row['title'] }}</h2>
+        <p>{{ row['text']|highlight_phrase(phrase)|safe }}</p>
+      </a>
+    {% endfor %}
+  </div>
+  <div class="pager">
+    {% if page > 1 %}<a href="{{ url_for('patterns', phrase=phrase, role=role, page=page-1) }}">← Previous</a>{% endif %}
+    {% if has_more %}<a href="{{ url_for('patterns', phrase=phrase, role=role, page=page+1) }}">Next →</a>{% endif %}
+  </div>
+</section>
+{% else %}
+<div class="empty"><h2>No matches</h2><p>Try a shorter phrase or switch the speaker filter.</p></div>
+{% endif %}
+{% endif %}
+{% endblock %}

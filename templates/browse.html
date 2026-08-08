@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Browse · Chat Export Explorer{% endblock %}
+{% block content %}
+<h1>Conversations</h1>
+<div class="list panel">
+{% for row in rows %}
+  <a class="list-row" href="{{ url_for('conversation', conversation_id=row['conversation_id']) }}">
+    <span><b>{{ row['title'] }}</b><small>{{ row['created_at'] or 'Unknown date' }}</small></span>
+    <em>{{ row['message_count'] }} messages</em>
+  </a>
+{% endfor %}
+</div>
+<div class="pager">
+  {% if page > 1 %}<a href="{{ url_for('browse', page=page-1) }}">← Previous</a>{% endif %}
+  {% if has_more %}<a href="{{ url_for('browse', page=page+1) }}">Next →</a>{% endif %}
+</div>
+{% endblock %}

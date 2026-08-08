@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}{{ convo['title'] }} · Chat Export Explorer{% endblock %}
+{% block content %}
+<section class="conversation-head"><a href="javascript:history.back()">← Back</a><h1>{{ convo['title'] }}</h1><p>{{ messages|length }} messages · {{ convo['created_at'] or 'Unknown date' }}</p></section>
+<section class="thread">
+{% for message in messages %}
+  <article class="message {{ message['role'] }}" id="{{ message['message_id'] }}">
+    <header><b>{{ 'You' if message['role']=='user' else message['role']|title }}</b><time>{{ message['created_at'] or '' }}</time></header>
+    <div class="message-text">{{ message['text'] }}</div>
+  </article>
+{% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Decision Simulator{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <p class="eyebrow">HISTORICAL BRANCH COMPARISON</p>
+  <h1>Decision Simulator</h1>
+  <p>Describe the current situation, select possible actions, and compare what followed when similar states contained those actions.</p>
+</section>
+
+<section class="panel">
+  <form method="post" class="trajectory-form">
+    <label for="text">Current situation</label>
+    <textarea id="text" name="text" rows="6" placeholder="Example: I am job hunting, studying Azure, uncertain about what to prioritize, and distracted by relationship stress.">{{ text }}</textarea>
+    <h3>Branches to compare</h3>
+    <div class="branch-picker">
+      {% for label in presets %}
+      <label class="branch-option"><input type="checkbox" name="branches" value="{{ label }}" {% if label in selected %}checked{% endif %}><span>{{ label }}</span></label>
+      {% endfor %}
+    </div>
+    <div class="custom-branch">
+      <label>Custom action label<input name="custom_label" value="{{ custom_label }}" placeholder="Example: Finish the Azure lab"></label>
+      <label>Evidence phrases<input name="custom_terms" value="{{ custom_terms }}" placeholder="finished lab, completed module, deployed app"></label>
+      <label class="branch-option compact-option"><input type="checkbox" name="branches" value="{{ custom_label }}" {% if custom_label and custom_label in selected %}checked{% endif %}><span>Include custom action</span></label>
+    </div>
+    <div class="form-row">
+      <label for="horizon">Compare outcomes after</label>
+      <select id="horizon" name="horizon">{% for days in [7,14,30] %}<option value="{{ days }}" {% if days == horizon %}selected{% endif %}>{{ days }} days</option>{% endfor %}</select>
+      <button type="submit">Simulate branches</button>
+    </div>
+  </form>
+  <p class="muted">Uses {{ total_states }} historical daily states. A branch with few cases is weak evidence, not a verdict.</p>
+</section>
+
+{% if analysis %}
+<section class="panel">
+  <h2>Current state signature</h2>
+  <div class="feature-bars">{% for feature, value in analysis.current_dominant %}<div class="feature-row"><span>{{ feature|title }}</span><div class="bar"><i style="width: {{ [value*34,100]|min }}%"></i></div><b>{{ '%.2f'|format(value) }}</b></div>{% endfor %}</div>
+</section>
+
+{% if analysis.best_supported %}
+<section class="recommendation-card">
+  <span>Best-supported historical branch</span>
+  <strong>{{ analysis.best_supported.label }}</strong>
+  <p>{{ analysis.best_supported.case_count }} comparable cases, {{ analysis.best_supported.coverage }}% coverage of the closest historical states.</p>
+</section>
+{% endif %}
+
+<section class="branch-results">
+{% for branch in analysis.branches %}
+<article class="branch-card">
+  <header><div><span>BRANCH</span><h2>{{ branch.label }}</h2></div><strong class="branch-score {% if branch.score > 0 %}up{% elif branch.score < 0 %}down{% endif %}">{{ '%+.2f'|format(branch.score) }}</strong></header>
+  <div class="branch-meta"><b>{{ branch.case_count }}</b> historical cases <b>{{ branch.coverage }}%</b> match coverage</div>
+  <p class="muted">Matched evidence terms: {{ branch.terms|join(', ') }}</p>
+  {% if branch.case_count %}
+  <h3>Average movement after {{ analysis.horizon_days }} days</h3>
+  <div class="change-list">{% for feature, delta in branch.average_deltas %}<div><span>{{ feature|title }}</span><b class="{% if delta > 0 %}up{% else %}down{% endif %}">{{ '%+.2f'|format(delta) }}</b></div>{% endfor %}</div>
+  <h3>Most common future signals</h3>
+  <div class="outcome-grid">{% for item in branch.outcomes %}<div class="outcome-card"><strong>{{ item.percent }}%</strong><span>{{ item.feature|title }}</span><small>{{ item.count }} cases</small></div>{% endfor %}</div>
+  <details><summary>Open historical evidence</summary><div class="case-list">{% for case in branch.cases %}<article class="case-card"><header><b>{{ case.state.date }}</b><span>{{ (case.state.similarity*100)|round|int }}% similar</span></header>{% for hit in case.evidence %}<a href="{{ url_for('conversation', conversation_id=hit.conversation_id) }}"><strong>{{ hit.title }}</strong><p>{{ hit.text[:360] }}{% if hit.text|length > 360 %}…{% endif %}</p></a>{% endfor %}<footer>{{ analysis.horizon_days }} days later: {{ case.future.date }}</footer></article>{% endfor %}</div></details>
+  {% else %}<div class="empty-inline">No comparable historical action cases found. Add more specific evidence phrases or choose another branch.</div>{% endif %}
+</article>
+{% endfor %}
+</section>
+{% endif %}
+{% endblock %}

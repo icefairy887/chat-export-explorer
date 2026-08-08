@@ -1,0 +1,13 @@
+{
+  "name": "chat-export-explorer-v4",
+  "version": "1.0.0",
+  "description": "A private local Flask app for searching a ChatGPT export and comparing a current situation with historically similar daily states.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

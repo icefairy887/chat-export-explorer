@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Search · Chat Export Explorer{% endblock %}
+{% block content %}
+<h1>Search</h1>
+<form class="searchbar compact" method="get">
+  <input name="q" value="{{ query }}" placeholder="Search your archive" autofocus>
+  <select name="role">
+    <option value="" {% if not role %}selected{% endif %}>Everyone</option>
+    <option value="user" {% if role=='user' %}selected{% endif %}>You</option>
+    <option value="assistant" {% if role=='assistant' %}selected{% endif %}>Assistant</option>
+  </select>
+  <button>Search</button>
+</form>
+{% if query %}
+  <p class="muted">Results for <b>{{ query }}</b></p>
+  <div class="results">
+    {% for row in rows %}
+      <a class="result" href="{{ url_for('conversation', conversation_id=row['conversation_id']) }}#{{ row['message_id'] }}">
+        <div><span class="role {{ row['role'] }}">{{ row['role'] }}</span><time>{{ row['created_at'] or 'Unknown date' }}</time></div>
+        <h2>{{ row['title'] }}</h2>
+        <p>{{ row['snippet']|safe }}</p>
+      </a>
+    {% else %}<div class="empty">No matches. Try fewer words or quote an exact phrase.</div>{% endfor %}
+  </div>
+  <div class="pager">
+    {% if page > 1 %}<a href="{{ url_for('search', q=query, role=role, page=page-1) }}">← Previous</a>{% endif %}
+    {% if has_more %}<a href="{{ url_for('search', q=query, role=role, page=page+1) }}">Next →</a>{% endif %}
+  </div>
+{% endif %}
+{% endblock %}

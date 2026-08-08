@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard · Chat Export Explorer{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">LOCAL MEMORY ENGINE</p>
+  <h1>Your archive, searchable.</h1>
+  <form class="searchbar" action="{{ url_for('search') }}">
+    <input name="q" placeholder='Try: "I don\'t know", Azure, spirit box' autofocus>
+    <button>Search</button>
+  </form>
+</section>
+<section class="stats-grid">
+  <article><strong>{{ '{:,}'.format(stats['conversations']) }}</strong><span>Conversations</span></article>
+  <article><strong>{{ '{:,}'.format(stats['messages']) }}</strong><span>Messages</span></article>
+  <article><strong>{{ '{:,}'.format(stats['user_messages']) }}</strong><span>Your messages</span></article>
+  <article><strong>{{ '{:,}'.format(stats['user_words']) }}</strong><span>Your words</span></article>
+</section>
+<section class="panel">
+  <div class="panel-head"><h2>Activity by month</h2></div>
+  <div class="bars">
+    {% set max_count = activity|map(attribute='message_count')|max if activity else 1 %}
+    {% for row in activity %}
+      <div class="bar-row"><span>{{ row['month'] }}</span><div class="bar"><i style="width: {{ (row['message_count'] / max_count * 100)|round }}%"></i></div><b>{{ row['message_count'] }}</b></div>
+    {% endfor %}
+  </div>
+</section>
+<section class="panel">
+  <div class="panel-head"><h2>Longest conversations</h2><a href="{{ url_for('browse') }}">Browse all</a></div>
+  <div class="list">
+    {% for row in longest %}
+      <a class="list-row" href="{{ url_for('conversation', conversation_id=row['conversation_id']) }}">
+        <span><b>{{ row['title'] }}</b><small>{{ row['created_at'] or 'Unknown date' }}</small></span>
+        <em>{{ row['message_count'] }} messages</em>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
