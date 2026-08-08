@@ -1,32 +1,189 @@
-# Chat Export Explorer v3: Trajectory Engine
+# Chat Export Explorer
 
-A private local Flask app for searching a ChatGPT export and comparing a current situation with historically similar daily states.
+Local-first semantic analysis for conversation archives.
 
-## Upgrade from v2
+Chat Export Explorer turns exported chat history into a searchable, inspectable analysis workspace using Flask, SQLite, local sentence embeddings, trajectory comparison, exchange-level structure, and evidence-linked semantic retrieval.
 
-Copy these into this folder:
+The project is designed around one rule: **analysis should stay traceable to the source messages that produced it.**
 
-- `chat_history.db`
-- optionally `conversations.json`
+## What it does
 
-Then run:
+- Full-text search across conversations with SQLite FTS5
+- Browse complete conversation threads
+- Track exact phrases over time with the Pattern Explorer
+- Build daily trajectory states and compare historically similar periods
+- Compare decision branches against historical outcomes
+- Generate local semantic embeddings with `all-MiniLM-L6-v2`
+- Search individual messages by semantic meaning instead of exact keywords
+- Group user input and assistant replies into exchange-level units while preserving role provenance
+- Import public UltraChat conversations into a separate demo database for safe testing
+
+## Architecture
+
+```text
+Conversation archive
+        |
+        v
+SQLite conversations + messages
+        |
+        +--> FTS5 search / browse / phrase patterns
+        |
+        +--> local message embeddings
+        |        |
+        |        +--> semantic message search
+        |        +--> exchange centroids
+        |
+        +--> daily trajectory states
+                 |
+                 +--> historical similarity
+                 +--> decision simulator
+```
+
+Two representations are intentionally preserved:
+
+- **User-authored evidence** is kept separate for observation-level analysis.
+- **Assistant-authored text** may provide conversational context, but should not be treated as independent evidence that a user pattern exists.
+
+## Privacy model
+
+Real conversation databases are local-only and ignored by Git.
+
+Do **not** commit:
+
+```text
+chat_history.db
+demo_chat_history.db
+conversations.json
+*.db
+```
+
+For public demonstrations, use the included UltraChat importer to build a separate synthetic/public database.
+
+## Quick start
+
+### 1. Install dependencies
 
 ```powershell
 python -m pip install -r requirements.txt
+```
+
+### 2. Use your own ChatGPT export
+
+Import `conversations.json`:
+
+```powershell
+python import_export.py conversations.json --database chat_history.db
+```
+
+Build trajectory states:
+
+```powershell
 python build_trajectories.py
+```
+
+Run the app:
+
+```powershell
 python app.py
 ```
 
-Open `http://127.0.0.1:5000/trajectory`.
+Open:
 
-## What the forecast means
+```text
+http://127.0.0.1:5000
+```
 
-The engine converts user messages into measurable feature densities such as career, learning, relationship focus, uncertainty, action, distress, confidence, sleep, money, and health. It compares your entered text with historical daily states using cosine similarity, then examines the state 7, 14, or 30 days later.
+## Public demo data with UltraChat
 
-It reports historical resemblance, not certainty. Every result includes the matching date and source text sample.
+Create a separate demo database without exposing private conversation history:
 
-## V4: Decision Simulator
+```powershell
+python import_ultrachat.py --limit 1000 --database demo_chat_history.db
+```
 
-Open `/simulate` or click **Simulator** in the navigation. Describe the current state, choose two or more possible actions, and compare what historically followed similar states when those actions appeared in the archive.
+Run the app against the demo DB:
 
-The branch score is a transparent heuristic: increases in career, learning, action, and confidence count positively; increases in distress and uncertainty count negatively. Always inspect case counts and source evidence before interpreting a result.
+```powershell
+$env:CHAT_DB="demo_chat_history.db"
+python app.py
+```
+
+Return to the default database later with:
+
+```powershell
+Remove-Item Env:CHAT_DB
+```
+
+## Semantic message search
+
+Build local message embeddings and run a query:
+
+```powershell
+python semantic_search.py --rebuild "A company wants to speak with me about joining their team" --limit 10
+```
+
+Embeddings are computed locally with Sentence Transformers and stored as float32 BLOBs in SQLite.
+
+The semantic layer is useful for queries whose meaning is present in the archive even when the exact words are not.
+
+## Exchange layer
+
+`build_exchanges.py` groups contiguous user input with the assistant reply or reply-run that follows it.
+
+Each exchange preserves:
+
+- conversation ID
+- timestamps
+- original message IDs
+- message roles
+- user-only centroid
+- full-context centroid
+- representative user message
+
+This layer exists because a single message is often too small to represent a meaningful conversational event.
+
+## Web features
+
+| Route | Purpose |
+|---|---|
+| `/` | Dashboard and archive statistics |
+| `/search` | Full-text semantic-independent archive search |
+| `/browse` | Browse conversations |
+| `/patterns` | Track exact phrase frequency and locations |
+| `/trajectory` | Compare a current state with historically similar daily states |
+| `/simulate` | Compare historical outcomes for different action branches |
+| `/health` | Database/server health check |
+
+## Analysis philosophy
+
+The project separates **retrieval** from **interpretation**.
+
+Semantic embeddings answer:
+
+> Which historical messages or states are actually similar in meaning?
+
+Trajectory features and downstream metrics answer:
+
+> What changed afterward, and what evidence supports that comparison?
+
+The goal is not to present similarity as certainty or correlation as causation. Results should remain inspectable, source-linked, and falsifiable.
+
+## Tech stack
+
+- Python
+- Flask
+- SQLite / FTS5
+- NumPy
+- Sentence Transformers
+- PyTorch
+- `all-MiniLM-L6-v2`
+- HTML / CSS
+- Optional Node.js tooling
+
+## Project status
+
+Current development focus is moving from message-level retrieval toward unsupervised recurring-event discovery using exchange-level representations while preserving user/assistant provenance.
+
+## License / dataset note
+
+The repository does not include private conversation data. Public demo data can be generated from `HuggingFaceH4/ultrachat_200k` using `import_ultrachat.py`. Review the upstream dataset terms before redistributing derived data.
