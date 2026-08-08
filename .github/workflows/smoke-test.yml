@@ -1,0 +1,45 @@
+name: Python smoke test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install core dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Compile Python sources
+        run: |
+          python -m compileall -q \
+            app.py \
+            trajectory.py \
+            simulator.py \
+            import_export.py \
+            import_ultrachat.py \
+            message_embeddings.py \
+            semantic_search.py \
+            build_exchanges.py \
+            build_trajectories.py \
+            event_discovery.py \
+            event_preview.py
+
+      - name: Verify core imports
+        run: python -c "import flask; import app; print('Core imports OK')"
