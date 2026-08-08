@@ -6,6 +6,10 @@ Chat Export Explorer turns exported chat history into a searchable, inspectable 
 
 The project is designed around one rule: **analysis should stay traceable to the source messages that produced it.**
 
+## Documentation
+
+Start with the [project wiki](docs/wiki/Home.md), then jump into [Setup](docs/wiki/Setup.md), [Architecture](docs/wiki/Architecture.md), [Data and Privacy](docs/wiki/Data-and-Privacy.md), [Semantic Pipeline](docs/wiki/Semantic-Pipeline.md), [UltraChat Demo Data](docs/wiki/UltraChat-Demo-Data.md), or the [Roadmap](docs/wiki/Roadmap.md).
+
 ## What it does
 
 - Full-text search across conversations with SQLite FTS5
