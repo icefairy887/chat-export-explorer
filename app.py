@@ -4,11 +4,14 @@ import os
 import re
 import sqlite3
 from pathlib import Path
+
 from flask import Flask, abort, g, redirect, render_template, request, url_for
 from markupsafe import Markup, escape
 
+from storage import get_database_path
+
 BASE_DIR = Path(__file__).resolve().parent
-DATABASE = Path(os.environ.get("CHAT_DB", BASE_DIR / "chat_history.db"))
+DATABASE = get_database_path()
 
 app = Flask(__name__)
 app.config["DATABASE"] = DATABASE
@@ -31,9 +34,10 @@ def highlight_phrase(text: str, phrase: str) -> Markup:
 
 def get_db() -> sqlite3.Connection:
     if "db" not in g:
-        if not DATABASE.exists():
-            raise FileNotFoundError(f"Database not found: {DATABASE}")
-        conn = sqlite3.connect(DATABASE)
+        database = Path(app.config["DATABASE"])
+        if not database.exists():
+            raise FileNotFoundError(f"Database not found: {database}")
+        conn = sqlite3.connect(database)
         conn.row_factory = sqlite3.Row
         g.db = conn
     return g.db
@@ -56,6 +60,12 @@ def safe_fts_query(query: str) -> str:
         return query
     tokens = re.findall(r"[\w']+", query, flags=re.UNICODE)
     return " AND ".join(f'"{token.replace(chr(34), chr(34)*2)}"' for token in tokens)
+
+
+def search_table_available(db: sqlite3.Connection) -> bool:
+    return db.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='message_search'"
+    ).fetchone() is not None
 
 
 @app.errorhandler(FileNotFoundError)
@@ -114,23 +124,38 @@ def search():
     has_more = False
 
     if query:
-        fts_query = safe_fts_query(query)
-        sql = """
-            SELECT message_id, conversation_id, title, role, created_at,
-                   snippet(message_search, 5, '<mark>', '</mark>', ' … ', 28) AS snippet,
-                   bm25(message_search) AS rank
-            FROM message_search
-            WHERE message_search MATCH ?
-        """
-        params: list[object] = [fts_query]
+        db = get_db()
+        params: list[object]
+        if search_table_available(db):
+            sql = """
+                SELECT message_id, conversation_id, title, role, created_at, text,
+                       bm25(message_search) AS rank
+                FROM message_search
+                WHERE message_search MATCH ?
+            """
+            params = [safe_fts_query(query)]
+        else:
+            sql = """
+                SELECT m.message_id, m.conversation_id,
+                       COALESCE(c.title, 'Untitled') AS title,
+                       m.role, m.created_at, m.text, 0 AS rank
+                FROM messages AS m
+                JOIN conversations AS c ON c.conversation_id = m.conversation_id
+                WHERE (m.text LIKE ? OR c.title LIKE ?)
+            """
+            contains_query = f"%{query}%"
+            params = [contains_query, contains_query]
         if role in {"user", "assistant", "system", "tool"}:
             sql += " AND role = ?"
             params.append(role)
-        sql += " ORDER BY rank, created_at DESC LIMIT ? OFFSET ?"
+        sql += " ORDER BY rank, 5 DESC LIMIT ? OFFSET ?"
         params.extend([per_page + 1, offset])
-        fetched = db_rows = get_db().execute(sql, params).fetchall()
+        fetched = db.execute(sql, params).fetchall()
         has_more = len(fetched) > per_page
-        rows = fetched[:per_page]
+        rows = [
+            {**dict(row), "snippet": highlight_phrase(row["text"], query)}
+            for row in fetched[:per_page]
+        ]
 
     return render_template(
         "search.html", query=query, role=role, rows=rows, page=page, has_more=has_more
@@ -288,9 +313,18 @@ def simulate_view():
 
 @app.route("/health")
 def health():
+    database = Path(app.config["DATABASE"])
+    if not database.exists():
+        return {"ok": True, "database": str(database), "database_ready": False, "messages": 0}
+
     db = get_db()
     count = db.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
-    return {"ok": True, "database": str(DATABASE), "messages": count}
+    return {
+        "ok": True,
+        "database": str(database),
+        "database_ready": True,
+        "messages": count,
+    }
 
 @app.route('/trajectory', methods=['GET', 'POST'])
 def trajectory_view():

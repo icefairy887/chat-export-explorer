@@ -9,6 +9,8 @@ __pycache__/
 *.pyc
 .env
 .copilot/
+build/
+dist/
 
 _tmp_*.py
 _inspect_schema.py

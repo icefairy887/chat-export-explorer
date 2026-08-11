@@ -65,6 +65,13 @@ For public demonstrations, use the included UltraChat importer to build a separa
 
 ## Quick start
 
+Current desktop release: **1.1.0**
+
+The Windows desktop build stores the active database in
+`%LOCALAPPDATA%\ChatExportExplorer\chat_history.db`. On first launch it migrates
+an existing `chat_history.db` placed beside the executable, leaving the source
+file untouched.
+
 ### 1. Install dependencies
 
 ```powershell
@@ -96,6 +103,17 @@ Open:
 ```text
 http://127.0.0.1:5000
 ```
+
+### Build the Windows desktop app
+
+Install PyInstaller, then build from the repository root:
+
+```powershell
+python -m pip install pyinstaller
+python -m PyInstaller --clean "Chat Export Explorer.spec"
+```
+
+The distributable folder is written to `dist\Chat Export Explorer`.
 
 ## Public demo data with UltraChat
 
