@@ -8,6 +8,7 @@ import webview
 from werkzeug.serving import make_server
 
 from app import app
+from version import __version__
 
 
 HOST = "127.0.0.1"
@@ -49,7 +50,7 @@ def main():
         raise RuntimeError("Chat Export Explorer failed to start.")
 
     window = webview.create_window(
-        "Chat Export Explorer",
+        f"Chat Export Explorer {__version__}",
         URL,
         width=1280,
         height=850,
