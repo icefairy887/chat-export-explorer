@@ -9,7 +9,7 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <AssemblyName>Lumina</AssemblyName>
     <Product>Lumina</Product>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
     <Nullable>enable</Nullable>
@@ -23,6 +23,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\lumina-mark.png" />
+    <Resource Include="Assets\lumina-mark.png" />
   </ItemGroup>
 
 </Project>

@@ -8,29 +8,50 @@ user-authored evidence events, and identifies changes across time.
 The full archive, embeddings, and SQLite database remain on the computer.
 Lumina stores working data in `%LOCALAPPDATA%\Lumina\analyzer.db`.
 
+## Easiest install: GitHub release
+
+1. Open the repository's **Releases** page.
+2. Download the newest `Lumina-Suite-*-win-x64.zip` file.
+3. Extract the ZIP completely.
+4. Double-click `Lumina.exe`. Do not launch it through `dotnet run` or a
+   command window.
+5. Drop one or more ChatGPT conversation JSON exports anywhere in Lumina, use
+   **Choose export files**, select **Find exports**, or start with **Try a
+   demo**.
+6. Select **Analyze my timeline**.
+7. Review **Insights**, then open **Signal timeline** to inspect dated events.
+
+The release is self-contained. It does not require a separate .NET install and
+does not include private conversation data.
+
 ## Run from source
 
 ```powershell
+./setup.ps1
 dotnet run --project .\ChatAnalyzer.Desktop\ChatAnalyzer.Desktop.csproj
 ```
 
+`setup.ps1` downloads the compatible MiniLM ONNX model from Hugging Face and
+verifies both model files with pinned SHA-256 hashes before installation.
+
 In the app:
 
-1. Leave **LLM Provider** set to **Local analysis only**.
-2. Select **Add ChatGPT Exports**.
-3. Choose one or more ChatGPT `conversations.json` export files.
-4. Select **ANALYZE**.
-5. Expand **Evidence & receipts** under a finding to inspect its source.
+1. Leave **Advanced AI settings** collapsed for fully local analysis.
+2. Drop or choose one or more ChatGPT `conversations.json` export files.
+3. Select **Analyze my timeline**.
+4. Review the dashboard counters and evidence-backed finding cards.
+5. Open **Show the receipts** under a finding to inspect its source.
+6. Open **Signal timeline** to inspect chronological user-authored events.
 
 ## Publish Windows x64
 
 ```powershell
-dotnet publish .\ChatAnalyzer.Desktop\ChatAnalyzer.Desktop.csproj -c Release -r win-x64 --self-contained true -o .\artifacts\Lumina
+./build-windows.ps1
 ```
 
-The local MiniLM model is copied into the published output automatically.
-Before building from a fresh source checkout, place `model.onnx` and
-`vocab.txt` under `Models\all-MiniLM-L6-v2`; see `Models\README.md`.
+The script downloads/verifies the model, publishes the self-contained Windows
+app, includes a locally built Archive Explorer when available, and writes a ZIP
+under `artifacts\`.
 
 ## Product boundary
 

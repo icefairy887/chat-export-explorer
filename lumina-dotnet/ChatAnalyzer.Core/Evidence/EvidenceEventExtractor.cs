@@ -67,15 +67,22 @@ public sealed class EvidenceEventExtractor
                     .OrderByDescending(x => x.Score)
                     .ToList();
 
-                var best = scores[0];
+                var explicitKind = ClassifyExplicitSelfReport(candidate.Text);
+                var best = explicitKind is not null
+                    ? scores.First(x => x.Kind == explicitKind.Value)
+                    : scores[0];
                 var second = scores.Count > 1 ? scores[1].Score : 0;
 
-                // Reject weak or ambiguous classifications.
-                if (best.Score < 0.22)
-                    continue;
+                // Explicit first-person language is stronger evidence than a
+                // close semantic tie between two neighboring event classes.
+                if (explicitKind is null)
+                {
+                    if (best.Score < 0.22)
+                        continue;
 
-                if (best.Score - second < 0.015)
-                    continue;
+                    if (best.Score - second < 0.015)
+                        continue;
+                }
 
                 if (!IsPlausible(best.Kind, candidate.Text))
                     continue;
@@ -98,6 +105,40 @@ public sealed class EvidenceEventExtractor
         return results
             .OrderBy(x => x.Timestamp)
             .ToList();
+    }
+
+    private static EvidenceKind? ClassifyExplicitSelfReport(string text)
+    {
+        var t = text.Trim().ToLowerInvariant();
+
+        if (ContainsAny(t,
+            "i finished", "i completed", "i passed", "i failed",
+            "i received", "i was accepted", "i was rejected",
+            "i got hired", "i got fired", "i got the job"))
+            return EvidenceKind.Outcome;
+
+        if (ContainsAny(t,
+            "i decided", "i've decided", "i have decided", "i chose",
+            "i'm going to", "i am going to", "i will ", "i won't "))
+            return EvidenceKind.Decision;
+
+        if (ContainsAny(t,
+            "i applied", "i sent", "i called", "i emailed", "i started",
+            "i stopped", "i made", "i built", "i created", "i enrolled",
+            "i installed", "i submitted", "i registered", "i did "))
+            return EvidenceKind.Action;
+
+        if (ContainsAny(t,
+            "i want", "i don't want", "i do not want", "i prefer",
+            "i'd rather", "i would rather", "i like", "i love", "i hate"))
+            return EvidenceKind.Preference;
+
+        if (ContainsAny(t,
+            "i think", "i believe", "i know ", "i don't think",
+            "i do not think", "i feel like"))
+            return EvidenceKind.Claim;
+
+        return null;
     }
 
 
