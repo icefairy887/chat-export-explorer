@@ -1,0 +1,52 @@
+name: Lumina Windows preview
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "lumina-dotnet/**"
+      - ".github/workflows/lumina-windows.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Download and verify local embedding model
+        shell: pwsh
+        run: ./lumina-dotnet/setup.ps1
+
+      - name: Build complete Lumina Suite
+        shell: pwsh
+        run: ./lumina-dotnet/build-windows.ps1
+
+      - name: Smoke-test embedded Archive Explorer
+        shell: pwsh
+        run: |
+          $lumina = "./lumina-dotnet/artifacts/Lumina-Suite-win-x64/Lumina.exe"
+          $process = Start-Process -FilePath $lumina -ArgumentList "--archive-smoke" -WindowStyle Hidden -PassThru -Wait
+          if ($process.ExitCode -ne 0) {
+            throw "Packaged embedded Archive Explorer smoke test failed with exit code $($process.ExitCode)."
+          }
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lumina-win-x64
+          path: ./lumina-dotnet/artifacts/Lumina-Suite-win-x64.zip
+          if-no-files-found: error

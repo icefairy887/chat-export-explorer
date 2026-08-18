@@ -1,0 +1,58 @@
+<Window x:Class="ChatAnalyzer.Desktop.ArchiveWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="Lumina Archive Explorer"
+        Width="1280" Height="850" MinWidth="920" MinHeight="640"
+        WindowStartupLocation="CenterOwner"
+        Background="#070D1B"
+        Icon="pack://application:,,,/Assets/lumina-mark.png"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="72" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="38" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#0B1325" BorderBrush="#253554" BorderThickness="0,0,0,1">
+            <Grid Margin="22,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Image Width="42" Height="42" Source="pack://application:,,,/Assets/lumina-mark.png" />
+                <StackPanel Grid.Column="1" Margin="13,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="ARCHIVE EXPLORER" Foreground="#F8FAFC" FontWeight="Bold" FontSize="17" />
+                    <TextBlock Text="Search the exact conversations behind your timeline" Foreground="#94A3B8" FontSize="12" Margin="0,3,0,0" />
+                </StackPanel>
+                <Button Grid.Column="2" Content="Refresh" Click="Refresh_Click" Padding="18,8" VerticalAlignment="Center"
+                        Foreground="#E2E8F0" Background="#17233B" BorderBrush="#33466D" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Border x:Name="LoadingPanel" Background="#070D1B" Panel.ZIndex="2">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="430">
+                    <Image Width="92" Height="92" Source="pack://application:,,,/Assets/lumina-mark.png" />
+                    <TextBlock Text="Opening your local archive…" Foreground="#F8FAFC" FontSize="22" FontWeight="SemiBold"
+                               TextAlignment="Center" Margin="0,18,0,0" />
+                    <TextBlock x:Name="LoadingDetail" Text="Starting the private search service." Foreground="#94A3B8"
+                               FontSize="13" TextAlignment="Center" TextWrapping="Wrap" Margin="0,9,0,0" />
+                    <ProgressBar Height="4" IsIndeterminate="True" Margin="40,22" Foreground="#A855F7" Background="#17233B" />
+                </StackPanel>
+            </Border>
+            <wv2:WebView2 x:Name="ArchiveView" DefaultBackgroundColor="#070D1B" />
+        </Grid>
+
+        <Border Grid.Row="2" Background="#0B1325" BorderBrush="#253554" BorderThickness="0,1,0,0">
+            <Grid Margin="16,0">
+                <TextBlock x:Name="ArchiveStatus" Text="Local only • preparing" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center" />
+                <TextBlock Text="Lumina never sends this archive to a cloud provider" Foreground="#6EE7B7" FontSize="11"
+                           HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

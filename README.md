@@ -2,6 +2,47 @@
 
 Local-first semantic analysis for conversation archives.
 
+## Lumina desktop analyzer preview
+
+The repository now also contains the source for **Lumina**, the .NET Windows
+longitudinal-analysis interface, under [`lumina-dotnet`](lumina-dotnet/README.md).
+Chat Export Explorer remains the archive, browse, search, and source-inspection
+layer. Lumina adds timeline-event persistence, local semantic change detection,
+evidence-linked findings, and an optional cloud reasoning boundary.
+
+The Windows Lumina Suite package bundles both interfaces:
+
+```text
+Lumina.exe
+Models/
+Archive Explorer/Chat Export Explorer Server.exe
+```
+
+Private exports and generated databases remain local and are not part of the
+repository or release source.
+
+### Use Lumina
+
+The simplest path is the repository's **Releases** page: download the newest
+Windows x64 Lumina Suite ZIP, extract it, and run `Lumina.exe` directly. The
+app now supports drag-and-drop imports, local export discovery, a synthetic
+demo, an evidence-linked insight dashboard, and a chronological signal
+timeline. Archive search now opens inside a native Lumina window; the bundled
+Python component is a loopback-only server and no longer contains pywebview or
+Python.NET.
+
+For a source build:
+
+```powershell
+cd lumina-dotnet
+./setup.ps1
+dotnet run --project ./ChatAnalyzer.Desktop/ChatAnalyzer.Desktop.csproj
+```
+
+The setup script downloads the compatible local embedding model and verifies
+its SHA-256 hashes. Pull requests that change Lumina are also validated by the
+Windows build workflow.
+
 Chat Export Explorer turns exported chat history into a searchable, inspectable analysis workspace using Flask, SQLite, local sentence embeddings, trajectory comparison, exchange-level structure, and evidence-linked semantic retrieval.
 
 The project is designed around one rule: **analysis should stay traceable to the source messages that produced it.**

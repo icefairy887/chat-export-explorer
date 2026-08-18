@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import os
 import threading
 import time
 import urllib.request
+
+# Python.NET's legacy .NET Framework probe can partially initialize and then
+# leave a frozen pywebview process unable to recover. Lumina and current
+# Windows builds already ship/run on modern .NET, so choose CoreCLR before
+# pywebview imports Python.NET.
+os.environ.setdefault("PYTHONNET_RUNTIME", "coreclr")
 
 import webview
 from werkzeug.serving import make_server

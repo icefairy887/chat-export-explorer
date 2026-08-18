@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ChatAnalyzer.App/ChatAnalyzer.App.csproj" />
+  <Project Path="ChatAnalyzer.Core/ChatAnalyzer.Core.csproj" />
+  <Project Path="ChatAnalyzer.Desktop/ChatAnalyzer.Desktop.csproj" />
+  <Project Path="ChatAnalyzer.EmbedTest/ChatAnalyzer.EmbedTest.csproj" />
+</Solution>
