@@ -12,6 +12,15 @@ __pycache__/
 build/
 dist/
 
+# Lumina .NET build and private analysis artifacts
+lumina-dotnet/**/bin/
+lumina-dotnet/**/obj/
+lumina-dotnet/artifacts/
+lumina-dotnet/Models/**/*.onnx
+lumina-dotnet/Models/**/vocab.txt
+*.json
+*.zip
+
 _tmp_*.py
 _inspect_schema.py
 check_embeddings.py
