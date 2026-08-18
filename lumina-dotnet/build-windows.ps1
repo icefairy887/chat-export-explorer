@@ -6,9 +6,22 @@ $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $artifactRoot = Join-Path $PSScriptRoot 'artifacts'
 $suiteDirectory = Join-Path $artifactRoot 'Lumina-Suite-win-x64'
 $zipPath = Join-Path $artifactRoot 'Lumina-Suite-win-x64.zip'
-$archiveExplorerSource = Join-Path $repositoryRoot 'dist\Chat Export Explorer'
+$archiveBuildVenv = Join-Path $artifactRoot 'archive-build-venv'
+$archivePython = Join-Path $archiveBuildVenv 'Scripts\python.exe'
+$archiveExplorerSource = Join-Path $repositoryRoot 'dist\Chat Export Explorer Server'
 
 & (Join-Path $PSScriptRoot 'setup.ps1')
+
+if (-not (Test-Path -LiteralPath $archivePython)) {
+    python -m venv $archiveBuildVenv
+}
+
+& $archivePython -m pip install --disable-pip-version-check `
+    -r (Join-Path $repositoryRoot 'requirements-archive-server.txt')
+& $archivePython -m PyInstaller --clean --noconfirm `
+    (Join-Path $repositoryRoot 'Chat Export Explorer.spec') `
+    --distpath (Join-Path $repositoryRoot 'dist') `
+    --workpath (Join-Path $repositoryRoot 'build')
 
 if (Test-Path -LiteralPath $suiteDirectory) {
     Remove-Item -LiteralPath $suiteDirectory -Recurse -Force

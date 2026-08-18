@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     private readonly List<string> _files = [];
     private readonly DesktopAnalyzerService _analyzer = new();
     private bool _spiritBoxMode;
+    private ArchiveWindow? _archiveWindow;
 
     public MainWindow()
     {
@@ -669,32 +670,15 @@ public partial class MainWindow : Window
 
     private void OpenExplorer_Click(object sender, RoutedEventArgs e)
     {
-        try
+        if (_archiveWindow is { IsLoaded: true })
         {
-            var configuredPath = Environment.GetEnvironmentVariable("LUMINA_ARCHIVE_EXPLORER");
-            var bundledPath = Path.Combine(AppContext.BaseDirectory, "Archive Explorer", "Chat Export Explorer.exe");
-            var developmentPath = @"E:\Projects\chat-export-explorer\dist\Chat Export Explorer\Chat Export Explorer.exe";
-            var exe = new[] { configuredPath, bundledPath, developmentPath }
-                .FirstOrDefault(path => !string.IsNullOrWhiteSpace(path) && File.Exists(path));
-
-            if (string.IsNullOrWhiteSpace(exe))
-            {
-                MessageBox.Show(this, "Archive Explorer is not installed beside Lumina.", "Archive Explorer not found", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            Process.Start(new ProcessStartInfo(exe)
-            {
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                WorkingDirectory = Path.GetDirectoryName(exe) ?? AppContext.BaseDirectory
-            });
+            _archiveWindow.Activate();
+            return;
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show(this, $"Archive Explorer could not start: {ex.Message}", "Lumina", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
+
+        _archiveWindow = new ArchiveWindow { Owner = this };
+        _archiveWindow.Closed += (_, _) => _archiveWindow = null;
+        _archiveWindow.Show();
     }
 
     private void SpiritBoxToggle_Checked(object sender, RoutedEventArgs e) => _spiritBoxMode = true;

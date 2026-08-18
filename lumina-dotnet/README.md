@@ -57,7 +57,9 @@ under `artifacts\`.
 
 The bundled Chat Export Explorer remains the archive/search interface. Lumina
 is the longitudinal analysis interface. The **Open Archive Explorer** button
-launches a bundled copy from `Archive Explorer\Chat Export Explorer.exe`.
+opens the archive inside a native Lumina WebView window. A bundled
+`Archive Explorer\Chat Export Explorer Server.exe` serves the existing search
+interface only on `127.0.0.1`; it does not use pywebview or Python.NET.
 
 Private exports, SQLite databases, and generated analysis data must not be
 committed to source control.

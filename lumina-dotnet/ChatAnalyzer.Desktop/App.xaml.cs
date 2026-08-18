@@ -11,6 +11,26 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        if (e.Args.Any(arg => string.Equals(arg, "--archive-smoke", StringComparison.OrdinalIgnoreCase)))
+        {
+            var archive = new ArchiveWindow();
+            MainWindow = archive;
+            archive.Show();
+            var healthy = false;
+            try
+            {
+                healthy = await archive.WaitUntilReadyAsync(TimeSpan.FromSeconds(30));
+            }
+            catch (TimeoutException)
+            {
+                healthy = false;
+            }
+
+            archive.Close();
+            Shutdown(healthy ? 0 : 1);
+            return;
+        }
+
         var window = new MainWindow();
         MainWindow = window;
 

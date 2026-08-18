@@ -45,11 +45,6 @@ public sealed class PredictiveInsightBuilder
             if (rising.Count < 2)
                 continue;
 
-            var early = finding.EarlyFunctions
-                .Take(2)
-                .Select(x => x.Function)
-                .ToList();
-
             var momentum = rising
                 .Average(x => trendMap[x.Function].Slope);
 
@@ -57,11 +52,19 @@ public sealed class PredictiveInsightBuilder
                 item.FinalScore *
                 (1.0 + momentum);
 
-            var hiddenChange =
-                $"Across independent conversations, use shifted from {Join(early)} toward {Join(rising.Take(3).Select(x => x.Function).ToList())}.";
+            var earlySignal = finding.Source.EarlySignals.FirstOrDefault();
+            var lateSignal = finding.Source.LateSignals.FirstOrDefault();
 
-            var convergenceSignals = rising
-                .Select(x => $"{x.Function} (+{x.Score:F3})")
+            if (string.IsNullOrWhiteSpace(earlySignal) ||
+                string.IsNullOrWhiteSpace(lateSignal))
+                continue;
+
+            var hiddenChange =
+                $"The evidence moved from “{Condense(earlySignal, 135)}” to “{Condense(lateSignal, 135)}” across {item.EarlyConversations + item.LateConversations} independent conversations.";
+
+            var convergenceSignals = finding.Source.LateSignals
+                .Take(4)
+                .Select(x => Condense(x, 92))
                 .ToList();
 
             var momentumSignals = rising
@@ -73,7 +76,7 @@ public sealed class PredictiveInsightBuilder
                 .ToList();
 
             var consequence =
-                $"Because these functions are still rising across successive time windows, upcoming conversations are most likely to increasingly combine {Join(rising.Take(3).Select(x => x.Function).ToList())}.";
+                $"The next test is observable repetition: another dated action or outcome consistent with “{Condense(lateSignal, 110)}”. If that does not recur, Lumina should downgrade this claim rather than turn it into a personality label.";
 
             var evidence = item.Finding.Source.Candidate.EarlyEvidence
                 .Concat(item.Finding.Source.Candidate.LateEvidence)
@@ -96,17 +99,15 @@ public sealed class PredictiveInsightBuilder
             .ToList();
     }
 
-    private static string Join(IReadOnlyList<string> items)
+    private static string Condense(string text, int length)
     {
-        if (items.Count == 0)
-            return "an unidentified pattern";
+        var cleaned = text
+            .Replace("\r", " ")
+            .Replace("\n", " ")
+            .Trim();
 
-        if (items.Count == 1)
-            return items[0];
-
-        if (items.Count == 2)
-            return $"{items[0]} and {items[1]}";
-
-        return $"{string.Join(", ", items.Take(items.Count - 1))}, and {items[^1]}";
+        return cleaned.Length <= length
+            ? cleaned
+            : cleaned[..length].TrimEnd() + "…";
     }
 }

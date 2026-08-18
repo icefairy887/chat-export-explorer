@@ -1,15 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_all
 
 datas = [('templates', 'templates'), ('static', 'static')]
 binaries = []
 hiddenimports = []
-tmp_ret = collect_all('webview')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 
 a = Analysis(
-    ['desktop.py'],
+    ['archive_server.py'],
     pathex=[],
     binaries=binaries,
     datas=datas,
@@ -17,7 +14,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['webview', 'pythonnet', 'clr', 'clr_loader'],
     noarchive=False,
     optimize=0,
 )
@@ -28,13 +25,13 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='Chat Export Explorer',
+    name='Chat Export Explorer Server',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     console=False,
-    disable_windowed_traceback=False,
+    disable_windowed_traceback=True,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
@@ -47,5 +44,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='Chat Export Explorer',
+    name='Chat Export Explorer Server',
 )

@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChatAnalyzer.Core\ChatAnalyzer.Core.csproj" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -9,7 +10,7 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <AssemblyName>Lumina</AssemblyName>
     <Product>Lumina</Product>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
     <Nullable>enable</Nullable>

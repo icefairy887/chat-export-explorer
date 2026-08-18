@@ -15,7 +15,7 @@ The Windows Lumina Suite package bundles both interfaces:
 ```text
 Lumina.exe
 Models/
-Archive Explorer/Chat Export Explorer.exe
+Archive Explorer/Chat Export Explorer Server.exe
 ```
 
 Private exports and generated databases remain local and are not part of the
@@ -27,7 +27,9 @@ The simplest path is the repository's **Releases** page: download the newest
 Windows x64 Lumina Suite ZIP, extract it, and run `Lumina.exe` directly. The
 app now supports drag-and-drop imports, local export discovery, a synthetic
 demo, an evidence-linked insight dashboard, and a chronological signal
-timeline.
+timeline. Archive search now opens inside a native Lumina window; the bundled
+Python component is a loopback-only server and no longer contains pywebview or
+Python.NET.
 
 For a source build:
 
