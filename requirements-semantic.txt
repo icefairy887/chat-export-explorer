@@ -1,0 +1,6 @@
+# Optional local semantic search and model evaluation; Python 3.12 recommended.
+# Keep the archive-only release free of large ML dependencies.
+Flask>=3.1,<4
+numpy>=2.0,<3
+sentence-transformers>=5.0,<6
+transformers>=4.51,<5

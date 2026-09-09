@@ -49,6 +49,8 @@ The project is designed around one rule: **analysis should stay traceable to the
 
 ## Documentation
 
+For the tested source workflow, start with [Run Lumina and test the search](docs/RUN-LUMINA.md). See the [current source review](docs/review/LUMINA-STATUS.md) for application boundaries, fixes, and remaining work.
+
 Start with the [project wiki](docs/wiki/Home.md), then jump into [Setup](docs/wiki/Setup.md), [Architecture](docs/wiki/Architecture.md), [Data and Privacy](docs/wiki/Data-and-Privacy.md), [Semantic Pipeline](docs/wiki/Semantic-Pipeline.md), [UltraChat Demo Data](docs/wiki/UltraChat-Demo-Data.md), or the [Roadmap](docs/wiki/Roadmap.md).
 
 ## What it does
@@ -125,6 +127,7 @@ Import `conversations.json`:
 
 ```powershell
 python import_export.py conversations.json --database chat_history.db
+$env:CHAT_DB="chat_history.db"
 ```
 
 Build trajectory states:
@@ -179,13 +182,14 @@ Remove-Item Env:CHAT_DB
 
 ## Semantic message search
 
-Build local message embeddings and run a query:
+Install the optional semantic runtime, then build local message embeddings and run a query:
 
 ```powershell
+python -m pip install -r requirements-semantic.txt
 python semantic_search.py --rebuild "A company wants to speak with me about joining their team" --limit 10
 ```
 
-Embeddings are computed locally with Sentence Transformers and stored as float32 BLOBs in SQLite.
+Embeddings are computed locally with Sentence Transformers and stored as float32 BLOBs in SQLite. Use `--model` to build and search a separate model index; use `--role user` for user-authored results. The source Search page now offers **Meaning** mode. Set `CHAT_EMBEDDING_MODEL` to the same model used to build the selected archive index.
 
 The semantic layer is useful for queries whose meaning is present in the archive even when the exact words are not.
 
@@ -210,7 +214,7 @@ This layer exists because a single message is often too small to represent a mea
 | Route | Purpose |
 |---|---|
 | `/` | Dashboard and archive statistics |
-| `/search` | Full-text semantic-independent archive search |
+| `/search` | Keyword search, or Meaning search against a prebuilt model index |
 | `/browse` | Browse conversations |
 | `/patterns` | Track exact phrase frequency and locations |
 | `/trajectory` | Compare a current state with historically similar daily states |

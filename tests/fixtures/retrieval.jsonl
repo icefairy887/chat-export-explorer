@@ -1,0 +1,44 @@
+{"type": "document", "id": "d01", "text": "They asked me to choose a time to speak with the hiring manager next week."}
+{"type": "document", "id": "d02", "text": "I sent my resume yesterday. Nobody from the company has replied yet."}
+{"type": "document", "id": "d03", "text": "The company said they selected another applicant and closed my application."}
+{"type": "document", "id": "d04", "text": "I start my new position on Monday. The written offer is signed."}
+{"type": "document", "id": "d05", "text": "I can do the work from home, but I cannot travel to an office every day."}
+{"type": "document", "id": "d06", "text": "The position is in the office five days a week. Remote work is not available."}
+{"type": "document", "id": "d07", "text": "The search gives me messages containing the same words but misses what I actually mean."}
+{"type": "document", "id": "d08", "text": "I typed the exact account number and found the right message immediately."}
+{"type": "document", "id": "d09", "text": "I swapped embedding models, but the stored vectors still came from the old encoder."}
+{"type": "document", "id": "d10", "text": "The database path was wrong, so the app opened an empty archive."}
+{"type": "document", "id": "d11", "text": "I installed the software successfully and can browse all the imported conversations."}
+{"type": "document", "id": "d12", "text": "The message was too long. Only its first 256 tokens reached the model."}
+{"type": "document", "id": "d13", "text": "All of the message text reached the model; none of it was truncated."}
+{"type": "document", "id": "d14", "text": "That statement was written by the assistant. I never said that it happened to me."}
+{"type": "document", "id": "d15", "text": "I wrote that it happened to me yesterday, and the original message is still in the archive."}
+{"type": "document", "id": "d16", "text": "I used to accept work in an office. Now I am applying only to jobs I can do from home."}
+{"type": "document", "id": "d17", "text": "I still accept work in an office. My preference has not changed."}
+{"type": "document", "id": "d18", "text": "The deadline moved from Monday to Friday, so I have four more days."}
+{"type": "document", "id": "d19", "text": "The deadline is still Monday. The request for an extension was denied."}
+{"type": "document", "id": "d20", "text": "Jordan cancelled the meeting. Taylor confirmed they would attend."}
+{"type": "document", "id": "d21", "text": "Taylor cancelled the meeting. Jordan confirmed they would attend."}
+{"type": "document", "id": "d22", "text": "I received approval to join the training course; the job application is still pending."}
+{"type": "document", "id": "d23", "text": "I was hired for the job; my training course application is still pending."}
+{"type": "document", "id": "d24", "text": "My cat is asleep on the sofa beside the window."}
+{"type": "document", "id": "d25", "text": "The water overflowed from the bathtub and ran into the floor vent."}
+{"type": "document", "id": "d26", "text": "A server restart cleared the hung process and restored service."}
+{"type": "document", "id": "d27", "text": "The model download failed because the network connection timed out."}
+{"type": "document", "id": "d28", "text": "The archive contains the answer, but it is buried inside a long conversation."}
+{"type": "document", "id": "d29", "text": "The meeting has not been cancelled. Everyone confirmed attendance."}
+{"type": "document", "id": "d30", "text": "The school accepted my application. This was admission, not an employment offer."}
+{"type": "query", "id": "q01", "category": "invitation paraphrase", "text": "A company wants to talk to me about a possible job.", "relevant": ["d01"]}
+{"type": "query", "id": "q02", "category": "status distinction", "text": "Find the message confirming I actually got the job.", "relevant": ["d04", "d23"]}
+{"type": "query", "id": "q03", "category": "negation", "text": "Work that requires me to be physically present every weekday.", "relevant": ["d06"]}
+{"type": "query", "id": "q04", "category": "meaning vs words", "text": "Search is matching vocabulary instead of intent.", "relevant": ["d07"]}
+{"type": "query", "id": "q05", "category": "technical cause", "text": "The encoder changed but the index was never regenerated.", "relevant": ["d09"]}
+{"type": "query", "id": "q06", "category": "truncation", "text": "The end of my long message was ignored during embedding.", "relevant": ["d12"]}
+{"type": "query", "id": "q07", "category": "provenance", "text": "The AI said it, so it is not evidence that I experienced it.", "relevant": ["d14"]}
+{"type": "query", "id": "q08", "category": "change over time", "text": "My work location requirements became stricter.", "relevant": ["d16"]}
+{"type": "query", "id": "q09", "category": "status distinction", "text": "I was given extra time to finish.", "relevant": ["d18"]}
+{"type": "query", "id": "q10", "category": "entity binding", "text": "Jordan backed out while Taylor still planned to come.", "relevant": ["d20"]}
+{"type": "query", "id": "q11", "category": "entity binding", "text": "Taylor backed out while Jordan still planned to come.", "relevant": ["d21"]}
+{"type": "query", "id": "q12", "category": "status distinction", "text": "Accepted into education but still waiting on employment.", "relevant": ["d22"]}
+{"type": "query", "id": "q13", "category": "failure cause", "text": "The model could not be fetched over the internet.", "relevant": ["d27"]}
+{"type": "query", "id": "q14", "category": "paraphrase", "text": "Bathroom flooding reached an air duct.", "relevant": ["d25"]}
