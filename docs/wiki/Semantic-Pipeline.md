@@ -4,9 +4,9 @@
 
 Every non-empty message can be encoded with the local Sentence Transformers model `all-MiniLM-L6-v2`.
 
-Embeddings are stored persistently in SQLite as float32 BLOBs with their dimension, norm, model name, and creation timestamp.
+Embeddings are stored persistently in SQLite as float32 BLOBs with their dimension, norm, model name, creation timestamp, and source-text hash. The composite key `(message_id, model_name)` keeps different model indexes separate.
 
-This makes semantic search incremental: messages already embedded with the same model do not need to be recomputed.
+This makes semantic search incremental: unchanged messages already embedded with the same model do not need to be recomputed. Legacy rows without hashes are preserved, then re-encoded on the next build.
 
 ## Semantic search
 
@@ -36,3 +36,7 @@ The user centroid is the safer representation for discovering recurring user-aut
 ## Next layer
 
 The planned next stage is unsupervised clustering over exchange-level user centroids, with every discovered cluster remaining traceable to the underlying user messages, conversation IDs, and timestamps.
+
+## Compare models before switching
+
+Use [the run guide](../RUN-LUMINA.md) and `evaluate_embeddings.py` to compare retrieval on labeled synthetic cases. Query and document encoding use their model-defined prompts. The C# ONNX engine and Python daily trajectories remain MiniLM; selecting a new Python message-search model does not replace those engines.

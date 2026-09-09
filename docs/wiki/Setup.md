@@ -19,6 +19,7 @@ Import a ChatGPT export into a local SQLite database:
 
 ```powershell
 python import_export.py conversations.json --database chat_history.db
+$env:CHAT_DB="chat_history.db"
 ```
 
 Build daily trajectory states:
@@ -61,6 +62,14 @@ Remove-Item Env:CHAT_DB
 ```
 
 ## Semantic search
+
+For the complete Windows comparison and demo workflow, see [Run Lumina](../RUN-LUMINA.md).
+
+Install the optional embedding runtime first:
+
+```powershell
+python -m pip install -r requirements-semantic.txt
+```
 
 Build message embeddings and run a search:
 

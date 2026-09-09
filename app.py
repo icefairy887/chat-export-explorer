@@ -15,6 +15,7 @@ DATABASE = get_database_path()
 
 app = Flask(__name__)
 app.config["DATABASE"] = DATABASE
+app.config["SEMANTIC_MODEL"] = os.environ.get("CHAT_EMBEDDING_MODEL", "all-MiniLM-L6-v2")
 
 
 @app.template_filter("highlight_phrase")
@@ -122,8 +123,29 @@ def search():
     offset = (page - 1) * per_page
     rows = []
     has_more = False
+    mode = "semantic" if request.args.get("mode") == "semantic" else "keyword"
+    search_error = None
 
-    if query:
+    if query and mode == "semantic":
+        from message_embeddings import semantic_message_search
+
+        db = get_db()
+        try:
+            fetched = semantic_message_search(
+                db, query, limit=offset + per_page + 1,
+                model_name=app.config["SEMANTIC_MODEL"], role=role or None,
+            )
+            has_more = len(fetched) > offset + per_page
+            for row in fetched[offset:offset + per_page]:
+                title = db.execute(
+                    "SELECT title FROM conversations WHERE conversation_id = ?",
+                    (row["conversation_id"],),
+                ).fetchone()
+                rows.append({**row, "title": title[0] if title else "Untitled",
+                             "snippet": escape(row["text"])})
+        except (RuntimeError, ValueError) as exc:
+            search_error = str(exc)
+    elif query:
         db = get_db()
         params: list[object]
         if search_table_available(db):
@@ -150,7 +172,17 @@ def search():
             params.append(role)
         sql += " ORDER BY rank, 5 DESC LIMIT ? OFFSET ?"
         params.extend([per_page + 1, offset])
-        fetched = db.execute(sql, params).fetchall()
+        try:
+            fetched = db.execute(sql, params).fetchall()
+        except sqlite3.OperationalError as exc:
+            if not search_table_available(db) or not any(
+                marker in str(exc).lower()
+                for marker in ("fts5: syntax error", "unterminated string", "no such column")
+            ):
+                raise
+            # Invalid user-entered FTS expressions should not crash the page.
+            search_error = "The search expression is invalid. Check quotes and operators."
+            fetched = []
         has_more = len(fetched) > per_page
         rows = [
             {**dict(row), "snippet": highlight_phrase(row["text"], query)}
@@ -158,7 +190,8 @@ def search():
         ]
 
     return render_template(
-        "search.html", query=query, role=role, rows=rows, page=page, has_more=has_more
+        "search.html", query=query, role=role, rows=rows, page=page, has_more=has_more,
+        mode=mode, search_error=search_error
     )
 
 

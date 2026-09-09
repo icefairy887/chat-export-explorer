@@ -1,4 +1,4 @@
-﻿chat_history.db
+chat_history.db
 demo_chat_history.db
 *.db
 *.db-wal
@@ -30,3 +30,7 @@ inspect_events.py
 inspect_messages.py
 print_specific_events.py
 run_semantic_tests.py
+
+# Local benchmark reports may contain private relevance labels.
+/artifacts/
+.pytest_cache/
