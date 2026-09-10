@@ -30,3 +30,6 @@ inspect_events.py
 inspect_messages.py
 print_specific_events.py
 run_semantic_tests.py
+
+data/sms/
+*.xml
