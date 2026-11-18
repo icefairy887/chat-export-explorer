@@ -34,3 +34,5 @@ run_semantic_tests.py
 # Local benchmark reports may contain private relevance labels.
 /artifacts/
 .pytest_cache/
+data/sms/
+*.xml
