@@ -77,6 +77,7 @@ using var embeddingService =
     new MiniLmEmbeddingService(modelPath, vocabPath);
 
 var store = new EmbeddingStore(databasePath);
+await store.InitializeAsync();
 
 var processor = new ExchangeEmbeddingProcessor(
     embeddingService,
@@ -87,6 +88,11 @@ var cachedEmbeddings = await store.GetAllAsync();
 var timelineSample = TimelineSampler.Sample(exchanges, targetCount: 1200);
 
 Console.WriteLine($"Timeline sample: {timelineSample.Count:N0} exchanges");
+if (timelineSample.Count == 0)
+{
+    Console.WriteLine("No dated user exchanges of at least 40 characters are available for timeline analysis.");
+    return;
+}
 Console.WriteLine($"Sample coverage: {timelineSample.First().StartedAt:yyyy-MM-dd} -> {timelineSample.Last().StartedAt:yyyy-MM-dd}");
 
 var missingSampleVectors = timelineSample
